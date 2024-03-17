@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _lookAction;
     private InputAction _jumpAction;
+    private InputAction _dashAction;
 
     private float _x, _y;
     private float _mouseX, _mouseY;
@@ -106,6 +107,7 @@ public class PlayerController : MonoBehaviour
         _moveAction = _playerInput.actions["Move"];
         _lookAction = _playerInput.actions["Look"];
         _jumpAction = _playerInput.actions["Jump"];
+        _dashAction = _playerInput.actions["Dash"];
     }
 
     private void InsertPlayerActionEvents()
