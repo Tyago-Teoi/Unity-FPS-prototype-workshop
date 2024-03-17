@@ -37,6 +37,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 _horizontalMove;
     private float _maxAirSpeed = 10f;
 
+    [SerializeField] private float _dashTime = 0.4f;
+    [SerializeField] private float _dashForce = 20f;
+    private Vector3 _moveBeforDash;
+    private bool _isDashing = false;
+    private IEnumerator _dashCoroutine;
+
+
     void Start()
     {
         _cam = Camera.main.transform;
@@ -44,6 +51,28 @@ public class PlayerController : MonoBehaviour
 
         InsertPlayerInputActions();
         InsertPlayerActionEvents();
+    }
+
+    private IEnumerator StartDashAndWait()
+    {
+        Debug.Log("Joined Dash and wait");
+        if (_isDashing)
+            yield break;
+
+        Debug.Log("IS DASHING");
+        _moveBeforDash = _move;
+        _isDashing = true;
+
+        yield return new WaitForSeconds(_dashTime);
+
+        _move = _moveBeforDash;
+        _isDashing = false;
+        Debug.Log("NOT DASHING");
+    }
+
+    private void Dash()
+    {
+        _move = new Vector3(0, 0, _dashForce);
     }
 
     // Update is called once per frame
@@ -59,9 +88,8 @@ public class PlayerController : MonoBehaviour
             // para o estado padrão ao terminar
 
             // Estado Padrão: Se Grounded : Default 
-            // Caso contrário: Descend
-
-            // o que é o raw
+            // Caso contrário: Descend            
+            Dash();
         }
 
         if (_state is PlayerStates.Ascend ||  _state is PlayerStates.Descend)
@@ -113,6 +141,7 @@ public class PlayerController : MonoBehaviour
     private void InsertPlayerActionEvents()
     {
         _jumpAction.performed += _jumpAction_performed;
+        _dashAction.performed += _dashAction_performed;
     }
 
     private void ReadInput()
@@ -129,7 +158,13 @@ public class PlayerController : MonoBehaviour
     }
 
     void DetectAerialState()
-    {        
+    {
+        if (_isDashing)
+        {
+            Debug.Log("DASH STATE");
+            _state = PlayerStates.Dash;
+            return;
+        }
         if (_characterController.isGrounded)
         {
             _state = PlayerStates.Default;
@@ -161,5 +196,12 @@ public class PlayerController : MonoBehaviour
 
             _move = this.transform.position + Vector3.up * _jumpForce;
         }
+    }
+
+    private void _dashAction_performed(InputAction.CallbackContext context)
+    {
+        _dashCoroutine = StartDashAndWait();
+        Debug.Log("_dashAction_performed");
+        StartCoroutine(_dashCoroutine);
     }
 }
