@@ -53,32 +53,6 @@ public class PlayerController : MonoBehaviour
         InsertPlayerActionEvents();
     }
 
-    private IEnumerator StartDashAndWait()
-    {
-        Debug.Log("Joined Dash and wait");
-        if (_isDashing)
-            yield break;
-
-        Debug.Log("IS DASHING");
-        _moveBeforDash = _move;
-        _isDashing = true;
-
-        yield return new WaitForSeconds(_dashTime);
-
-        _move = _moveBeforDash;
-        _isDashing = false;
-        Debug.Log("NOT DASHING");
-    }
-
-    private void Dash()
-    {
-        GetHorizontalAndVertical();
-
-        _horizontalMove = this.transform.rotation * Vector3.forward * _dashForce;
-        _move = _horizontalMove;
-        _move.y = 0;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -160,7 +134,6 @@ public class PlayerController : MonoBehaviour
     {
         if (_isDashing)
         {
-            Debug.Log("DASH STATE");
             _state = PlayerStates.Dash;
             return;
         }
@@ -187,6 +160,14 @@ public class PlayerController : MonoBehaviour
         _move = _horizontalMove;
         _move.y = _verticalMove;
     }
+    private void Dash()
+    {
+        GetHorizontalAndVertical();
+
+        _horizontalMove = this.transform.rotation * Vector3.forward * _dashForce;
+        _move = _horizontalMove;
+        _move.y = 0;
+    }
 
     private void GetHorizontalAndVertical()
     {
@@ -211,7 +192,20 @@ public class PlayerController : MonoBehaviour
     private void _dashAction_performed(InputAction.CallbackContext context)
     {
         _dashCoroutine = StartDashAndWait();
-        Debug.Log("_dashAction_performed");
         StartCoroutine(_dashCoroutine);
+    }
+
+    private IEnumerator StartDashAndWait()
+    {
+        if (_isDashing)
+            yield break;
+
+        _moveBeforDash = _move;
+        _isDashing = true;
+
+        yield return new WaitForSeconds(_dashTime);
+
+        _move = _moveBeforDash;
+        _isDashing = false;
     }
 }
