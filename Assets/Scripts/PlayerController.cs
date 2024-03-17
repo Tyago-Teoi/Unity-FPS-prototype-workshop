@@ -72,7 +72,11 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
-        _move = new Vector3(0, 0, _dashForce);
+        GetHorizontalAndVertical();
+
+        _horizontalMove = this.transform.rotation * Vector3.forward * _dashForce;
+        _move = _horizontalMove;
+        _move.y = 0;
     }
 
     // Update is called once per frame
@@ -105,12 +109,7 @@ public class PlayerController : MonoBehaviour
 
         if (_state is PlayerStates.Default)
         {
-            GetHorizontalAndVertical();
-
-            _horizontalMove = this.transform.rotation * _horizontalMove * _speed;
-
-            _move = _horizontalMove;
-            _move.y = _verticalMove;
+            Move(_speed);
         }
 
         _move += Vector3.up * _gravity * Time.deltaTime;
@@ -179,11 +178,22 @@ public class PlayerController : MonoBehaviour
             _state = PlayerStates.Descend;
     }   
 
+    private void Move(float speed)
+    {
+        GetHorizontalAndVertical();
+
+        _horizontalMove = this.transform.rotation * _horizontalMove * speed;
+
+        _move = _horizontalMove;
+        _move.y = _verticalMove;
+    }
+
     private void GetHorizontalAndVertical()
     {
         _verticalMove = _move.y;
         _horizontalMove = new Vector3(_x, 0, _y);
     }
+
 
     // -- Events
     private void _jumpAction_performed(InputAction.CallbackContext obj)
